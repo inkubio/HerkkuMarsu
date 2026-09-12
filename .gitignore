@@ -1,3 +1,6 @@
 *.csv
+*.csv.bak
 __pycache__/
 config.txt
+venv/
+venv.bak/
