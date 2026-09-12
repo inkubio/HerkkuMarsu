@@ -76,7 +76,7 @@ def use_money(username, user_id, money):
     Returns the current amount of the money in user's money column 
     '''
     df = pd.read_csv("credits.csv")
-    current_money = float(df.loc[df['name']==username, "money"]) - float(money)
+    current_money = float(df.loc[df['id']==user_id, "money"]) - float(money)
 
     if current_money >= 0:
         df.loc[df["id"]==user_id, "money"] = round(current_money,2)
