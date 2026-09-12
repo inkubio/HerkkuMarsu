@@ -6,7 +6,8 @@ Token got from BotFather should be saved in config.txt file. The program parses 
 automaticly form config.txt file 
 '''
 
-import reader_writer
+import sql_reader_writer as reader_writer
+from db import create_db
 import configparser
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove, Chat
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, MessageHandler, filters, ConversationHandler
@@ -73,8 +74,7 @@ async def check_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
     PASSWORD = config["PASSWORD"]["bot_password"]
 
     if message == PASSWORD:
-        if not reader_writer.add_old_credits(username, id):
-            reader_writer.add_user(username, id)
+        reader_writer.add_user(username, id)
 
         await context.bot.send_message(
             chat_id=update.effective_chat.id,
@@ -97,9 +97,19 @@ async def awake(update: Update, context: ContextTypes.DEFAULT_TYPE):
     Returns the state CHOOSE, which activates the function choose
     '''
     name = update.message.from_user.first_name
+    username = update.message.from_user.username
     id = update.message.from_user.id
 
     if reader_writer.find_user(id):
+        await context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text=main_menu_text(id).format(name=name),
+            reply_markup=main_menu_keyboard(id)
+        )
+
+        return CHOOSE
+
+    elif reader_writer.add_old_credits(username, id):
         await context.bot.send_message(
             chat_id=update.effective_chat.id,
             text=main_menu_text(id).format(name=name),
@@ -307,7 +317,7 @@ def main():
     config = configparser.ConfigParser()
     config.read('config.txt')
     TOKEN = config["TOKEN"]["telegram_bot_token"]
-    reader_writer.create_csv()
+    create_db()
 
     money_filter = filters.Regex("^(?:([2][0])(?:\.0)?|[1][0-9](?:\.([0-9]|[0-9][0,5]))?|[1-9](?:\.([0-9]|[0-9][0,5]))?|0?\.([0-9]|[0-9][0,5]))$") 
     application = ApplicationBuilder().token(TOKEN).build()
