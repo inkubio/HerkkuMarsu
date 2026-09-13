@@ -237,6 +237,32 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
     return CHOOSE
 
+async def invalid_amount_treats(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    '''
+    User is in TREATS state but gave invalid amount.
+    Show error message but stay in TREATS state.
+    '''
+    id = update.message.from_user.id
+    await context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text=cancel_text(id),
+        reply_markup=ReplyKeyboardRemove()
+    )
+    return TREATS
+
+async def invalid_amount_credits(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    '''
+    User is in CREDITS state but gave invalid amount.
+    Show error message but stay in CREDITS state.
+    '''
+    id = update.message.from_user.id
+    await context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text=cancel_text(id),
+        reply_markup=ReplyKeyboardRemove()
+    )
+    return CREDITS
+
 async def lang_cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
@@ -320,7 +346,7 @@ def main():
     TOKEN = config["TOKEN"]["telegram_bot_token"]
     create_db()
 
-    money_filter = filters.Regex("^(?:([2][0])(?:\.0)?|[1][0-9](?:\.([0-9]|[0-9][05]))?|[1-9](?:\.([0-9]|[0-9][05]))?|0?\.([0-9]|[0-9][05]))$") 
+    money_filter = filters.Regex("^(20(\\.0)?|1[0-9](\\.[0-9]{1,2})?|[1-9](\\.[0-9]{1,2})?|0(\\.[0-9]{1,2})?)$") 
     application = ApplicationBuilder().token(TOKEN).build()
 
     # Handler for the conversation 
@@ -333,12 +359,14 @@ def main():
 
     conv_handler = ConversationHandler( entry_points= [CommandHandler('start', awake)],
                                         states={CHOOSE: [MessageHandler(filters.Regex("^(Osta Herkkuja|Lisää Rahaa|Tarkista Kreditit|Change Language|END|Buy Snacks|Add Money|Check Balance)$"), choose)],
-                                                TREATS: [MessageHandler(money_filter, buy)],
-                                                CREDITS: [MessageHandler(money_filter, add_credits)],
+                                                TREATS: [MessageHandler(money_filter, buy),
+                                                         MessageHandler(filters.TEXT, invalid_amount_treats)],
+                                                CREDITS: [MessageHandler(money_filter, add_credits),
+                                                          MessageHandler(filters.TEXT, invalid_amount_credits)],
                                                 CHECK_USER: [MessageHandler(filters.TEXT, check_user)],
                                                 LANGUAGE: [MessageHandler(filters.Regex("^(suomi|English)$"), change_language)]
                                         },
-                                        fallbacks= [MessageHandler(filters.TEXT, cancel)]
+                                        fallbacks= []
                                     )   
     application.add_handler(conv_handler)
     application.run_polling()
