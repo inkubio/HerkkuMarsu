@@ -1,5 +1,6 @@
 *.csv
 *.csv.bak
+*.db
 __pycache__/
 config.txt
 venv/
