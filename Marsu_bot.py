@@ -159,6 +159,7 @@ async def choose(update: Update, context: ContextTypes.DEFAULT_TYPE):
             text=check_text(id).format(amount=amount),
             reply_markup=main_menu_keyboard(id)
         )
+        return CHOOSE
     
     elif message == "END":
         await context.bot.send_message(
@@ -319,7 +320,7 @@ def main():
     TOKEN = config["TOKEN"]["telegram_bot_token"]
     create_db()
 
-    money_filter = filters.Regex("^(?:([2][0])(?:\.0)?|[1][0-9](?:\.([0-9]|[0-9][0,5]))?|[1-9](?:\.([0-9]|[0-9][0,5]))?|0?\.([0-9]|[0-9][0,5]))$") 
+    money_filter = filters.Regex("^(?:([2][0])(?:\.0)?|[1][0-9](?:\.([0-9]|[0-9][05]))?|[1-9](?:\.([0-9]|[0-9][05]))?|0?\.([0-9]|[0-9][05]))$") 
     application = ApplicationBuilder().token(TOKEN).build()
 
     # Handler for the conversation 
