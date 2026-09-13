@@ -187,10 +187,6 @@ async def buy(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message =  update.message.text
     user = update.message.from_user.username
     id = update.message.from_user.id
-    
-    print(f"\n>>> BUY FUNCTION CALLED")
-    print(f"    Message: '{message}'")
-    print(f"    User: {user}, ID: {id}\n")
 
     amount = reader_writer.use_money(user, id, message)
     if amount < 0:
@@ -217,11 +213,6 @@ async def add_credits(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message =  update.message.text
     user = update.message.from_user.username
     id = update.message.from_user.id
-    
-    print(f"\n>>> ADD_CREDITS FUNCTION CALLED")
-    print(f"    Message: '{message}'")
-    print(f"    User: {user}, ID: {id}\n")
-    
     amount = reader_writer.add_money(user, id, message)
 
     await context.bot.send_message(
@@ -237,13 +228,6 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     which is not recognised by bot. 
     '''
     id = update.message.from_user.id
-    message = update.message.text
-    print(f"\n!!! CANCEL CALLED !!!")
-    print(f"    User ID: {id}")
-    print(f"    Message: '{message}'")
-    print(f"    Message type: {type(message)}")
-    print(f"    Message length: {len(message) if message else 0}")
-    print("!!!!!!!!!!!!!!!!!!!!!!\n")
 
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
@@ -335,17 +319,7 @@ def main():
     TOKEN = config["TOKEN"]["telegram_bot_token"]
     create_db()
 
-    # DEBUG: Test regex pattern with sample values
-    import re
-    regex_str = "^(?:([2][0])(?:\.0)?|[1][0-9](?:\.([0-9]|[0-9][0,5]))?|[1-9](?:\.([0-9]|[0-9][0,5]))?|0?\.([0-9]|[0-9][0,5]))$"
-    test_values = ["0", "0.0", "0.1", "10", "5", "5.50", "20", "20.0"]
-    print("\n=== REGEX PATTERN TEST ===")
-    for val in test_values:
-        match = re.match(regex_str, val)
-        print(f"  '{val}' -> {'✓ MATCH' if match else '✗ NO MATCH'}")
-    print("===========================\n")
-    
-    money_filter = filters.Regex(regex_str) 
+    money_filter = filters.Regex("^(?:([2][0])(?:\.0)?|[1][0-9](?:\.([0-9]|[0-9][0,5]))?|[1-9](?:\.([0-9]|[0-9][0,5]))?|0?\.([0-9]|[0-9][0,5]))$") 
     application = ApplicationBuilder().token(TOKEN).build()
 
     # Handler for the conversation 
